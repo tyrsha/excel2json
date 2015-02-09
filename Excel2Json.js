@@ -167,7 +167,7 @@ if (typeof JSON !== 'object') {
         gap,
         indent,
         meta = {    // table of character substitutions
-            '\b': '\\b
+            '\b': '\\b',
             '\t': '\\t',
             '\n': '\\n',
             '\f': '\\f',
