@@ -167,7 +167,7 @@ if (typeof JSON !== 'object') {
         gap,
         indent,
         meta = {    // table of character substitutions
-            '\b': '\\b',
+            '\b': '\\b
             '\t': '\\t',
             '\n': '\\n',
             '\f': '\\f',
@@ -632,7 +632,9 @@ function saveAsCSV( sheet, tmpdir )
 
 function getPrettyValue( value )
 {
+    // log("getPrettyValue: " + value + "," + typeof(value));
 	if( value == null ) return "";
+    if (value.length == 0) return "";
 	if( typeof(value) == "number" ) return value;
 	if( typeof(value) == "string" && isFinite(value) ) return Number(value);
 	return String(value);
@@ -643,7 +645,9 @@ function readCSVLine( csvLine )
 	var values = [];
 	var value = null;
 	var inQuote = false;
+    // log("readCSVLine: " + csvLine);
 	csvLine = String(csvLine);
+    // log("readCSVLine: String:" + csvLine);
 	for(var i=0; i<csvLine.length; i++) {
 		var ch = csvLine.charAt(i);
 		var chNext = '';
@@ -775,18 +779,30 @@ function compileArrayObjectTable( sheet, row, keyIndex )
 	var value = [];
 	log( "Parsing Array Object Table..." );
 	while( sheet[row] != undefined ) {
+        // for line comment fuctionality
+        if (sheet[row][0] == "!")
+        {
+            row++;
+            continue;            
+        }
 		var obj = {};
 		var isSane = false;
+        var allEmpty = true;
 		for( subkey in keyIndex ) {
 			var valCol = keyIndex[subkey];
 			if( subkey.endsWith( "[]" ) ) {
 				subkey = subkey.substr( 0, subkey.length - 2 );
 				obj[ subkey ] = readCSVLine( sheet[row][valCol] );
+                log( "parse []: " + obj[subkey] );
 				if( obj[subkey].length > 0 ) {
 					isSane = true;
+                    allEmpty = false;
 				}
 			} else {
 				obj[ subkey ] = getPrettyValue(sheet[row][valCol]);
+                if (obj[subkey].length > 0) {
+                    allEmpty = false;
+                }
 				if( obj[subkey] ) {
 					isSane = true;
 				}
@@ -795,6 +811,10 @@ function compileArrayObjectTable( sheet, row, keyIndex )
 		if( !isSane ) {
 			break;
 		}
+        // ignore all empty line
+        if (allEmpty == true) {
+            break;
+        }
 		value.push( obj );
 		row++;
 	}
