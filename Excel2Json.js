@@ -862,7 +862,7 @@ function compileObjectArrayTable( sheet, row, keyIndex )
 }
 
 
-function compileSheet( sheet, rootObject )
+function compileSheet( sheet, sheetName, rootObject )
 {
 	var csvFile = sheet[0];
 	setScanningFile( csvFile );
@@ -916,6 +916,10 @@ function compileSheet( sheet, rootObject )
 			if( compiler ) {
 				var value = compiler.call( null, sheet, row + 1, keyIndex );
 				if( value ) {
+          // save file
+          var stringValue = JSON.stringify( value ).split("\n").join("\r\n");
+          saveJson(sheetName, stringValue);
+
 					rootObject[objectName] = value;
 				}
 			}
@@ -925,13 +929,13 @@ function compileSheet( sheet, rootObject )
 	}
 }
 
-function compileSheetArray( sheetArray )
+function compileSheetArray(sheetArray, sheetNames)
 {
 	var rootObject = {};
 
 	for( var i=0; i<sheetArray.length; i++ )
 	{
-		compileSheet( sheetArray[i], rootObject );
+		compileSheet( sheetArray[i], sheetNames[i], rootObject );
 	}
 	return rootObject;
 }
@@ -943,6 +947,7 @@ function parseExcel( excelFile )
 	var tmpdir = excelFile + g_tempSuffix;
 	var csvFiles = [];
 	var sheetArray = [];
+  var sheetNames = [];
 	deleteTemp( tmpdir );
 
 	log( "\r\nLoading: " + excelFile );
@@ -957,8 +962,9 @@ function parseExcel( excelFile )
 			}
 			var csvFile = saveAsCSV( sheet, tmpdir );
 			setScanningFile( csvFile );
-			csvFiles.push( csvFile );
-			sheetArray.push( readCSVFile( csvFile, sheetArray ) );
+      sheetNames.push(sheet.Name);
+			csvFiles.push(csvFile );
+			sheetArray.push(readCSVFile(csvFile));
 		}
 	} catch(e) {
 		popup( "Error: " + e.message );
@@ -968,7 +974,7 @@ function parseExcel( excelFile )
 	E.Workbooks.Close();
 	deleteTemp( tmpdir );
 	log( "Closing: " + excelFile );
-	var rootObject = compileSheetArray( sheetArray );
+	var rootObject = compileSheetArray(sheetArray, sheetNames);
 	return JSON.stringify( rootObject ).split("\n").join("\r\n");
 }
 
