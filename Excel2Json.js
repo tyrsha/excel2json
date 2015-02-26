@@ -916,9 +916,11 @@ function compileSheet( sheet, sheetName, rootObject )
 			if( compiler ) {
 				var value = compiler.call( null, sheet, row + 1, keyIndex );
 				if( value ) {
-          // save file
-          var stringValue = JSON.stringify( value ).split("\n").join("\r\n");
-          saveJson(sheetName, stringValue);
+                    var saveObject = {}
+                    saveObject[objectName] = value;
+                    // save file
+                    var stringValue = JSON.stringify(saveObject).split("\n").join("\r\n");
+                    saveJson(sheetName, stringValue);
 
 					rootObject[objectName] = value;
 				}
