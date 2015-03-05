@@ -864,6 +864,7 @@ function compileObjectArrayTable( sheet, row, keyIndex )
 
 function compileSheet( sheet, sheetName, rootObject )
 {
+    var saveObject = {}
 	var csvFile = sheet[0];
 	setScanningFile( csvFile );
 	for( var row=1; row<sheet.length; row++ )
@@ -916,12 +917,7 @@ function compileSheet( sheet, sheetName, rootObject )
 			if( compiler ) {
 				var value = compiler.call( null, sheet, row + 1, keyIndex );
 				if( value ) {
-                    var saveObject = {}
                     saveObject[objectName] = value;
-                    // save file
-                    var stringValue = JSON.stringify(saveObject).split("\n").join("\r\n");
-                    saveJson(sheetName, stringValue);
-
 					rootObject[objectName] = value;
 				}
 			}
@@ -929,6 +925,9 @@ function compileSheet( sheet, sheetName, rootObject )
 		//	popup("Exception: " + e);
 		//}
 	}
+    // save file
+    var stringValue = JSON.stringify(saveObject).split("\n").join("\r\n");
+    saveJson(sheetName, stringValue);
 }
 
 function compileSheetArray(sheetArray, sheetNames)
